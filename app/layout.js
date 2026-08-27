@@ -1,6 +1,6 @@
 export const metadata = {
   title: "PCScout",
-  description: "البحث عن أفضل أسعار قطع الكمبيوتر",
+  description: "موقع البحث عن قطع الكمبيوتر",
 };
 
 export default function RootLayout({ children }) {
