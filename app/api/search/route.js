@@ -29,7 +29,7 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q")?.toLowerCase() || "";
 
-  const results = products.filter(product =>
+  const results = products.filter((product) =>
     product.name.toLowerCase().includes(query) ||
     product.category.toLowerCase().includes(query) ||
     product.specs.toLowerCase().includes(query)
