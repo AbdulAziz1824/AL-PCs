@@ -2,12 +2,24 @@
 
 import { useState } from "react";
 
-const parts = [
-  { category: "CPU", name: "AMD Ryzen 7 7800X3D", price: 1299 },
-  { category: "GPU", name: "NVIDIA RTX 5070", price: 2399 },
-  { category: "RAM", name: "Kingston Fury Beast 32GB DDR5", price: 399 },
-  { category: "Storage", name: "Samsung 990 EVO 1TB", price: 329 },
-];
+const parts = {
+  CPU: [
+    { name: "AMD Ryzen 7 7800X3D", price: 1299 },
+    { name: "AMD Ryzen 5 7600X", price: 799 },
+  ],
+  GPU: [
+    { name: "NVIDIA RTX 5070", price: 2399 },
+    { name: "AMD Radeon RX 7800 XT", price: 1899 },
+  ],
+  RAM: [
+    { name: "Kingston Fury Beast 32GB DDR5", price: 399 },
+    { name: "Corsair Vengeance 32GB DDR5", price: 429 },
+  ],
+  Storage: [
+    { name: "Samsung 990 EVO 1TB", price: 329 },
+    { name: "WD Black SN850X 1TB", price: 349 },
+  ],
+};
 
 export default function Builder() {
   const [selected, setSelected] = useState({});
@@ -17,10 +29,12 @@ export default function Builder() {
     0
   );
 
-  function choosePart(part) {
+  function selectPart(category, index) {
+    const part = parts[category][index];
+
     setSelected((current) => ({
       ...current,
-      [part.category]: part,
+      [category]: part,
     }));
   }
 
@@ -31,6 +45,7 @@ export default function Builder() {
         minHeight: "100vh",
         background: "#f5f6f8",
         padding: "40px 20px",
+        color: "#111827",
       }}
     >
       <div style={{ maxWidth: "1100px", margin: "auto" }}>
@@ -39,54 +54,63 @@ export default function Builder() {
         </h1>
 
         <p style={{ color: "#6b7280", marginBottom: "30px" }}>
-          اختر قطع جهازك وشاهد السعر الإجمالي مباشرة
+          اختر القطع وابنِ جهازك
         </p>
 
         <section
           style={{
-            background: "#fff",
-            borderRadius: "18px",
-            padding: "25px",
-            marginBottom: "25px",
+            display: "grid",
+            gap: "18px",
           }}
         >
-          {parts.map((part) => (
+          {Object.entries(parts).map(([category, items]) => (
             <div
-              key={part.category}
+              key={category}
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "18px 0",
-                borderBottom: "1px solid #eee",
+                background: "#fff",
+                padding: "22px",
+                borderRadius: "18px",
               }}
             >
-              <div>
-                <strong>{part.category}</strong>
-                <div style={{ color: "#6b7280", marginTop: "5px" }}>
-                  {selected[part.category]?.name || "لم يتم الاختيار"}
-                </div>
-              </div>
+              <h2 style={{ marginTop: 0 }}>{category}</h2>
 
-              <button
-                onClick={() => choosePart(part)}
+              <select
+                value={
+                  selected[category]
+                    ? items.findIndex(
+                        (item) =>
+                          item.name === selected[category].name
+                      )
+                    : ""
+                }
+                onChange={(e) =>
+                  selectPart(category, Number(e.target.value))
+                }
                 style={{
-                  background: "#111827",
-                  color: "#fff",
-                  border: "none",
+                  width: "100%",
+                  padding: "14px",
+                  border: "1px solid #d1d5db",
                   borderRadius: "10px",
-                  padding: "10px 18px",
-                  cursor: "pointer",
+                  fontSize: "16px",
+                  background: "#fff",
                 }}
               >
-                اختيار
-              </button>
+                <option value="">اختر قطعة</option>
+
+                {items.map((item, index) => (
+                  <option key={item.name} value={index}>
+                    {item.name} -{" "}
+                    {item.price.toLocaleString("ar-SA")} ريال
+                  </option>
+                ))}
+              </select>
             </div>
           ))}
         </section>
 
         <section
           style={{
+            marginTop: "25px",
             background: "#111827",
             color: "#fff",
             borderRadius: "18px",
@@ -96,7 +120,7 @@ export default function Builder() {
             alignItems: "center",
           }}
         >
-          <strong>الإجمالي</strong>
+          <span>إجمالي التجميعة</span>
 
           <strong style={{ fontSize: "28px" }}>
             {total.toLocaleString("ar-SA")} ريال
