@@ -1,285 +1,290 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 
-export default function Builder() {
-  const parts = [
-    {
-      name: "CPU",
-      description: "المعالج",
-      icon: "⚡",
-    },
-    {
-      name: "GPU",
-      description: "كرت الشاشة",
-      icon: "🎮",
-    },
-    {
-      name: "Motherboard",
-      description: "اللوحة الأم",
-      icon: "🧩",
-    },
-    {
-      name: "RAM",
-      description: "الذاكرة",
-      icon: "💾",
-    },
-    {
-      name: "Storage",
-      description: "التخزين",
-      icon: "📦",
-    },
-    {
-      name: "PSU",
-      description: "مزود الطاقة",
-      icon: "🔌",
-    },
-    {
-      name: "Case",
-      description: "الكيس",
-      icon: "🖥️",
-    },
-    {
-      name: "Cooler",
-      description: "التبريد",
-      icon: "❄️",
-    },
-  ];
-
-  const cpus = [
-    { name: "AMD Ryzen 5 5600", price: 399 },
-    { name: "AMD Ryzen 5 5600X", price: 449 },
-    { name: "AMD Ryzen 5 7600", price: 699 },
-    { name: "AMD Ryzen 7 7700", price: 999 },
-    { name: "AMD Ryzen 7 7800X3D", price: 1399 },
-    { name: "Intel Core i5-14400F", price: 599 },
-    { name: "Intel Core i5-14600K", price: 899 },
-    { name: "Intel Core i7-14700K", price: 1299 },
-  ];
-
-  const [selected, setSelected] = useState({});
-  const [showCpu, setShowCpu] = useState(false);
-
-  function choosePart(part) {
-    if (part.name === "CPU") {
-      setShowCpu(!showCpu);
-      return;
-    }
-
-    setSelected({
-      ...selected,
-      [part.name]: part.name,
-    });
-  }
-
-  function chooseCpu(cpu) {
-    setSelected({
-      ...selected,
-      CPU: cpu,
-    });
-
-    setShowCpu(false);
-  }
-
-  const totalPrice = Object.values(selected).reduce(
-    (total, part) => total + (part.price || 0),
-    0
-  );
-
+export default function Home() {
   return (
     <main
+      dir="rtl"
       style={{
         minHeight: "100vh",
-        background: "#f5f7fb",
-        padding: "50px 20px",
+        background: "#050505",
+        color: "white",
         fontFamily: "Arial, sans-serif",
-        direction: "rtl",
       }}
     >
-      <div
+      {/* Navbar */}
+      <nav
         style={{
-          maxWidth: "1100px",
-          margin: "auto",
+          height: "75px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 7%",
+          borderBottom: "1px solid #151515",
+          background: "#080808",
         }}
       >
         <div
           style={{
-            textAlign: "center",
-            marginBottom: "45px",
+            fontSize: "25px",
+            fontWeight: "bold",
+            color: "#39ff88",
           }}
         >
-          <h1
+          AL PC
+        </div>
+
+        <div style={{ display: "flex", gap: "30px", alignItems: "center" }}>
+          <Link href="/" style={navLink}>
+            الرئيسية
+          </Link>
+
+          <Link href="/builder" style={navLink}>
+            تجميع جهاز
+          </Link>
+
+          <a href="#features" style={navLink}>
+            المميزات
+          </a>
+        </div>
+
+        <Link href="/builder" style={buttonStyle}>
+          ابدأ الآن
+        </Link>
+      </nav>
+
+      {/* Hero */}
+      <section
+        style={{
+          minHeight: "650px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          padding: "80px 20px",
+          background:
+            "radial-gradient(circle at center, #123d25 0%, #080808 45%, #050505 75%)",
+        }}
+      >
+        <div style={{ maxWidth: "850px" }}>
+          <div
             style={{
-              fontSize: "42px",
-              marginBottom: "12px",
-              color: "#111827",
+              display: "inline-block",
+              padding: "8px 18px",
+              borderRadius: "30px",
+              background: "#0d2117",
+              border: "1px solid #1d713f",
+              color: "#39ff88",
+              marginBottom: "25px",
+              fontSize: "14px",
             }}
           >
-            بناء تجميعة الكمبيوتر
+            ⚡ ابنِ جهازك المثالي
+          </div>
+
+          <h1
+            style={{
+              fontSize: "clamp(45px, 7vw, 82px)",
+              lineHeight: "1.1",
+              margin: "0",
+              fontWeight: "900",
+            }}
+          >
+            جمّع جهازك
+            <br />
+            <span style={{ color: "#39ff88" }}>بكل سهولة</span>
           </h1>
 
           <p
             style={{
-              color: "#6b7280",
-              fontSize: "18px",
+              color: "#aaa",
+              fontSize: "20px",
+              lineHeight: "1.8",
+              margin: "30px auto",
+              maxWidth: "650px",
             }}
           >
-            اختر مكونات جهازك وابنِ تجميعتك بسهولة
+            اختر القطع المناسبة لك، وتأكد من توافقها، واحصل على تجميعة تناسب
+            استخدامك وميزانيتك.
+          </p>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "15px",
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <Link
+              href="/builder"
+              style={{
+                ...buttonStyle,
+                padding: "16px 35px",
+                fontSize: "17px",
+                boxShadow: "0 0 30px rgba(57,255,136,.2)",
+              }}
+            >
+              ابدأ تجميع جهازك →
+            </Link>
+
+            <a
+              href="#features"
+              style={{
+                padding: "16px 35px",
+                borderRadius: "10px",
+                border: "1px solid #333",
+                color: "white",
+                textDecoration: "none",
+                fontSize: "17px",
+              }}
+            >
+              اكتشف المميزات
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section
+        id="features"
+        style={{
+          padding: "90px 7%",
+          background: "#080808",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: "55px" }}>
+          <h2 style={{ fontSize: "42px", marginBottom: "15px" }}>
+            كل شيء تحتاجه
+          </h2>
+
+          <p style={{ color: "#888", fontSize: "18px" }}>
+            أدوات بسيطة تساعدك في بناء جهازك المثالي
           </p>
         </div>
 
         <div
           style={{
             display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(240px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
             gap: "20px",
+            maxWidth: "1100px",
+            margin: "auto",
           }}
         >
-          {parts.map((part) => {
-            const isSelected = selected[part.name];
+          <Feature
+            icon="🧩"
+            title="توافق القطع"
+            text="تأكد من توافق مكونات جهازك قبل الشراء."
+          />
 
-            return (
-              <div key={part.name}>
-                <div
-                  style={{
-                    background: "white",
-                    border: isSelected
-                      ? "2px solid #2563eb"
-                      : "1px solid #e5e7eb",
-                    borderRadius: "18px",
-                    padding: "25px",
-                    boxShadow:
-                      "0 5px 20px rgba(0,0,0,0.05)",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "35px",
-                      marginBottom: "15px",
-                    }}
-                  >
-                    {part.icon}
-                  </div>
+          <Feature
+            icon="💰"
+            title="تحكم بالميزانية"
+            text="كوّن جهازك حسب ميزانيتك بدون تعقيد."
+          />
 
-                  <h2
-                    style={{
-                      margin: "0 0 8px",
-                      color: "#111827",
-                    }}
-                  >
-                    {part.name}
-                  </h2>
+          <Feature
+            icon="⚡"
+            title="أداء قوي"
+            text="اختر القطع التي تعطيك أفضل أداء مقابل السعر."
+          />
 
-                  <p
-                    style={{
-                      color: "#6b7280",
-                      marginBottom: "20px",
-                    }}
-                  >
-                    {isSelected && part.name === "CPU"
-                      ? isSelected.name
-                      : part.description}
-                  </p>
-
-                  <button
-                    onClick={() => choosePart(part)}
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      borderRadius: "10px",
-                      border: "none",
-                      background: isSelected
-                        ? "#16a34a"
-                        : "#2563eb",
-                      color: "white",
-                      fontSize: "16px",
-                      fontWeight: "bold",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {isSelected
-                      ? "تغيير الاختيار"
-                      : "اختيار"}
-                  </button>
-                </div>
-
-                {part.name === "CPU" && showCpu && (
-                  <div
-                    style={{
-                      marginTop: "10px",
-                      background: "white",
-                      border: "1px solid #e5e7eb",
-                      borderRadius: "15px",
-                      padding: "15px",
-                      boxShadow:
-                        "0 5px 20px rgba(0,0,0,0.08)",
-                    }}
-                  >
-                    {cpus.map((cpu) => (
-                      <button
-                        key={cpu.name}
-                        onClick={() => chooseCpu(cpu)}
-                        style={{
-                          width: "100%",
-                          padding: "14px",
-                          marginBottom: "8px",
-                          borderRadius: "10px",
-                          border:
-                            "1px solid #e5e7eb",
-                          background: "#f9fafb",
-                          cursor: "pointer",
-                          textAlign: "right",
-                        }}
-                      >
-                        <strong>{cpu.name}</strong>
-
-                        <div
-                          style={{
-                            marginTop: "5px",
-                            color: "#2563eb",
-                          }}
-                        >
-                          {cpu.price} ريال
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          <Feature
+            icon="🎮"
+            title="للألعاب"
+            text="تجميعات مناسبة للألعاب والاستخدامات المختلفة."
+          />
         </div>
+      </section>
 
-        <div
+      {/* CTA */}
+      <section
+        style={{
+          padding: "100px 20px",
+          textAlign: "center",
+          background:
+            "linear-gradient(180deg, #080808 0%, #0d2417 100%)",
+        }}
+      >
+        <h2 style={{ fontSize: "42px", marginBottom: "15px" }}>
+          جاهز تبني جهازك؟
+        </h2>
+
+        <p style={{ color: "#999", fontSize: "18px", marginBottom: "30px" }}>
+          ابدأ الآن واختر قطع جهازك خطوة بخطوة.
+        </p>
+
+        <Link
+          href="/builder"
           style={{
-            marginTop: "35px",
-            padding: "25px",
-            background: "white",
-            borderRadius: "18px",
-            border: "1px solid #e5e7eb",
-            textAlign: "center",
+            ...buttonStyle,
+            display: "inline-block",
+            padding: "16px 40px",
+            fontSize: "18px",
           }}
         >
-          <h2 style={{ color: "#111827" }}>
-            ملخص التجميعة
-          </h2>
+          ابدأ الآن
+        </Link>
+      </section>
 
-          <p style={{ color: "#6b7280" }}>
-            تم اختيار {Object.keys(selected).length} من{" "}
-            {parts.length} مكونات
-          </p>
-
-          <h2
-            style={{
-              marginTop: "20px",
-              color: "#2563eb",
-            }}
-          >
-            السعر الإجمالي: {totalPrice} ريال
-          </h2>
-        </div>
-      </div>
+      {/* Footer */}
+      <footer
+        style={{
+          padding: "30px 7%",
+          borderTop: "1px solid #171717",
+          color: "#666",
+          textAlign: "center",
+          background: "#050505",
+        }}
+      >
+        © 2026 AL PC - جميع الحقوق محفوظة
+      </footer>
     </main>
   );
 }
+
+function Feature({ icon, title, text }) {
+  return (
+    <div
+      style={{
+        padding: "30px",
+        borderRadius: "15px",
+        border: "1px solid #1b1b1b",
+        background: "#0d0d0d",
+        textAlign: "center",
+        transition: "0.2s",
+      }}
+    >
+      <div style={{ fontSize: "38px", marginBottom: "15px" }}>{icon}</div>
+
+      <h3 style={{ fontSize: "22px", marginBottom: "12px" }}>{title}</h3>
+
+      <p
+        style={{
+          color: "#888",
+          lineHeight: "1.7",
+          margin: 0,
+        }}
+      >
+        {text}
+      </p>
+    </div>
+  );
+}
+
+const navLink = {
+  color: "#aaa",
+  textDecoration: "none",
+  fontSize: "15px",
+};
+
+const buttonStyle = {
+  color: "#000",
+  background: "#39ff88",
+  textDecoration: "none",
+  padding: "11px 22px",
+  borderRadius: "9px",
+  fontWeight: "bold",
+};
