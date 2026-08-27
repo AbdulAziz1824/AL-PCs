@@ -8,7 +8,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   async function searchProducts() {
-    if (!query.trim()) {
+    const search = query.trim();
+
+    if (!search) {
       setResults([]);
       return;
     }
@@ -17,7 +19,7 @@ export default function Home() {
 
     try {
       const response = await fetch(
-        `/api/search?q=${encodeURIComponent(query)}`
+        `/api/search?q=${encodeURIComponent(search)}`
       );
 
       const data = await response.json();
@@ -26,13 +28,14 @@ export default function Home() {
     } catch (error) {
       console.error(error);
       setResults([]);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
     <main
+      dir="rtl"
       style={{
         minHeight: "100vh",
         background: "#f5f6f8",
@@ -42,18 +45,24 @@ export default function Home() {
     >
       <div
         style={{
-          maxWidth: "1100px",
+          maxWidth: "1150px",
           margin: "0 auto"
         }}
       >
-        <header
-          style={{
-            marginBottom: "40px"
-          }}
-        >
+        <header style={{ marginBottom: "35px" }}>
+          <div
+            style={{
+              fontSize: "14px",
+              color: "#6b7280",
+              marginBottom: "8px"
+            }}
+          >
+            PC Parts Search
+          </div>
+
           <h1
             style={{
-              fontSize: "42px",
+              fontSize: "44px",
               margin: 0,
               fontWeight: 800
             }}
@@ -67,14 +76,14 @@ export default function Home() {
               fontSize: "18px"
             }}
           >
-            ابحث عن قطع الكمبيوتر وقارن الأسعار
+            ابحث عن قطع الكمبيوتر وقارن أسعار المتاجر
           </p>
         </header>
 
         <section
           style={{
             background: "#ffffff",
-            padding: "25px",
+            padding: "22px",
             borderRadius: "18px",
             boxShadow: "0 4px 20px rgba(0,0,0,0.06)"
           }}
@@ -93,14 +102,13 @@ export default function Home() {
                   searchProducts();
                 }
               }}
-              placeholder="مثال: RTX 5070 أو Ryzen 7"
+              placeholder="ابحث مثل: RTX 5070 أو Ryzen 7 أو DDR5"
               style={{
                 flex: 1,
                 padding: "16px",
                 border: "1px solid #d1d5db",
                 borderRadius: "12px",
-                fontSize: "16px",
-                outline: "none"
+                fontSize: "16px"
               }}
             />
 
@@ -108,7 +116,7 @@ export default function Home() {
               onClick={searchProducts}
               disabled={loading}
               style={{
-                padding: "0 28px",
+                padding: "0 30px",
                 border: "none",
                 borderRadius: "12px",
                 background: "#111827",
@@ -122,12 +130,8 @@ export default function Home() {
           </div>
         </section>
 
-        <section
-          style={{
-            marginTop: "30px"
-          }}
-        >
-          {results.length === 0 && !loading && query && (
+        <section style={{ marginTop: "30px" }}>
+          {results.length === 0 && query && !loading && (
             <div
               style={{
                 background: "#fff",
@@ -145,7 +149,7 @@ export default function Home() {
             style={{
               display: "grid",
               gridTemplateColumns:
-                "repeat(auto-fill, minmax(280px, 1fr))",
+                "repeat(auto-fill, minmax(330px, 1fr))",
               gap: "20px"
             }}
           >
@@ -162,8 +166,7 @@ export default function Home() {
                 <div
                   style={{
                     color: "#6b7280",
-                    fontSize: "14px",
-                    marginBottom: "8px"
+                    fontSize: "14px"
                   }}
                 >
                   {product.category}
@@ -171,8 +174,8 @@ export default function Home() {
 
                 <h2
                   style={{
-                    fontSize: "20px",
-                    margin: "0 0 10px"
+                    fontSize: "21px",
+                    margin: "8px 0"
                   }}
                 >
                   {product.name}
@@ -181,7 +184,7 @@ export default function Home() {
                 <p
                   style={{
                     color: "#6b7280",
-                    marginBottom: "20px"
+                    marginBottom: "18px"
                   }}
                 >
                   {product.brand} · {product.model}
@@ -192,7 +195,7 @@ export default function Home() {
                     background: "#f3f4f6",
                     borderRadius: "12px",
                     padding: "12px",
-                    fontSize: "14px"
+                    marginBottom: "18px"
                   }}
                 >
                   {Object.entries(product.specs).map(
@@ -202,7 +205,7 @@ export default function Home() {
                         style={{
                           display: "flex",
                           justifyContent: "space-between",
-                          marginBottom: "6px"
+                          marginBottom: "7px"
                         }}
                       >
                         <span>{key}</span>
@@ -211,6 +214,53 @@ export default function Home() {
                     )
                   )}
                 </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      marginBottom: "10px"
+                    }}
+                  >
+                    مقارنة الأسعار
+                  </div>
+
+                  {product.offers?.map((offer) => (
+                    <div
+                      key={offer.store}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "11px 0",
+                        borderTop: "1px solid #e5e7eb"
+                      }}
+                    >
+                      <span>{offer.store}</span>
+
+                      <strong>
+                        {offer.price.toLocaleString("ar-SA")} ريال
+                      </strong>
+                    </div>
+                  ))}
+                </div>
+
+                {product.cheapest && (
+                  <div
+                    style={{
+                      marginTop: "15px",
+                      padding: "12px",
+                      borderRadius: "10px",
+                      background: "#ecfdf5",
+                      color: "#047857",
+                      fontWeight: 700,
+                      textAlign: "center"
+                    }}
+                  >
+                    الأرخص: {product.cheapest.store} ·{" "}
+                    {product.cheapest.price.toLocaleString("ar-SA")} ريال
+                  </div>
+                )}
               </article>
             ))}
           </div>
