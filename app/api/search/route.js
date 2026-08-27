@@ -1,67 +1,42 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+
+const products = [
+  {
+    id: 1,
+    name: "AMD Ryzen 7 7800X3D",
+    category: "CPU",
+    specs: "8 Cores / 16 Threads",
+    offers: [
+      { store: "Amazon.sa", price: 1299 },
+      { store: "Noon", price: 1349 },
+      { store: "Trendyol", price: 1280 }
+    ]
+  },
+  {
+    id: 2,
+    name: "NVIDIA GeForce RTX 5070",
+    category: "GPU",
+    specs: "12GB GDDR7",
+    offers: [
+      { store: "Amazon.sa", price: 2399 },
+      { store: "Noon", price: 2450 },
+      { store: "Trendyol", price: 2315 }
+    ]
+  }
+];
 
 export async function GET(request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const query = searchParams.get("q")?.trim();
+  const { searchParams } = new URL(request.url);
+  const query = searchParams.get("q")?.toLowerCase() || "";
 
-    if (!query) {
-      return NextResponse.json({
-        success: true,
-        results: [],
-      });
-    }
+  const results = products.filter(product =>
+    product.name.toLowerCase().includes(query) ||
+    product.category.toLowerCase().includes(query) ||
+    product.specs.toLowerCase().includes(query)
+  );
 
-    const { data: products, error } = await supabase
-      .from("products")
-      .select("*")
-      .ilike("name", `%${query}%`)
-      .limit(30);
-
-    if (error) {
-      console.error(error);
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Database error",
-        },
-        { status: 500 }
-      );
-    }
-
-    const results = await Promise.all(
-      products.map(async (product) => {
-        const { data: offers } = await supabase
-          .from("offers")
-          .select("*")
-          .eq("product_id", product.id)
-          .eq("available", true)
-          .order("price", { ascending: true });
-
-        return {
-          ...product,
-          offers: offers || [],
-          cheapest: offers?.[0] || null,
-        };
-      })
-    );
-
-    return NextResponse.json({
-      success: true,
-      query,
-      results,
-    });
-  } catch (error) {
-    console.error(error);
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Server error",
-      },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({
+    success: true,
+    results
+  });
 }
