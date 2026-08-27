@@ -1,157 +1,68 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { products } from "@/lib/products";
 
 const categories = [
-  { id: "CPU", name: "المعالج", icon: "CPU" },
-  { id: "GPU", name: "كرت الشاشة", icon: "GPU" },
-  { id: "Motherboard", name: "اللوحة الأم", icon: "MB" },
-  { id: "RAM", name: "الذاكرة", icon: "RAM" },
-  { id: "Storage", name: "التخزين", icon: "SSD" },
-  { id: "PSU", name: "مزود الطاقة", icon: "PSU" },
-  { id: "Case", name: "الكيس", icon: "CASE" },
-  { id: "Cooler", name: "المبرد", icon: "COOL" },
+  { id: "CPU", name: "المعالج" },
+  { id: "GPU", name: "كرت الشاشة" },
+  { id: "Motherboard", name: "اللوحة الأم" },
+  { id: "RAM", name: "الذاكرة" },
+  { id: "Storage", name: "التخزين" },
+  { id: "PSU", name: "مزود الطاقة" },
+  { id: "Case", name: "الكيس" },
+  { id: "Cooler", name: "المبرد" },
 ];
-
-const products = {
-  CPU: [
-    {
-      name: "AMD Ryzen 7 7800X3D",
-      price: 1299,
-      socket: "AM5",
-    },
-    {
-      name: "AMD Ryzen 5 7600X",
-      price: 799,
-      socket: "AM5",
-    },
-    {
-      name: "Intel Core i5-14600K",
-      price: 999,
-      socket: "LGA1700",
-    },
-  ],
-
-  GPU: [
-    {
-      name: "NVIDIA GeForce RTX 5070",
-      price: 2399,
-      power: 250,
-    },
-    {
-      name: "AMD Radeon RX 7800 XT",
-      price: 1899,
-      power: 263,
-    },
-    {
-      name: "NVIDIA GeForce RTX 4060 Ti",
-      price: 1599,
-      power: 160,
-    },
-  ],
-
-  Motherboard: [
-    {
-      name: "MSI B650 Gaming Plus",
-      price: 699,
-      socket: "AM5",
-      ram: "DDR5",
-    },
-    {
-      name: "ASUS TUF B650-PLUS",
-      price: 799,
-      socket: "AM5",
-      ram: "DDR5",
-    },
-    {
-      name: "MSI B760 Gaming Plus",
-      price: 649,
-      socket: "LGA1700",
-      ram: "DDR5",
-    },
-  ],
-
-  RAM: [
-    {
-      name: "Kingston Fury Beast 32GB DDR5 6000",
-      price: 399,
-      ram: "DDR5",
-    },
-    {
-      name: "Corsair Vengeance 32GB DDR5 6000",
-      price: 429,
-      ram: "DDR5",
-    },
-  ],
-
-  Storage: [
-    {
-      name: "Samsung 990 EVO 1TB",
-      price: 329,
-    },
-    {
-      name: "WD Black SN850X 1TB",
-      price: 349,
-    },
-  ],
-
-  PSU: [
-    {
-      name: "Corsair RM750e 750W",
-      price: 399,
-      wattage: 750,
-    },
-    {
-      name: "MSI MAG A850GL 850W",
-      price: 449,
-      wattage: 850,
-    },
-  ],
-
-  Case: [
-    {
-      name: "NZXT H5 Flow",
-      price: 349,
-    },
-    {
-      name: "Lian Li Lancool 216",
-      price: 499,
-    },
-  ],
-
-  Cooler: [
-    {
-      name: "Thermalright Peerless Assassin 120",
-      price: 199,
-    },
-    {
-      name: "DeepCool AK620",
-      price: 249,
-    },
-  ],
-};
 
 export default function Builder() {
   const [selected, setSelected] = useState({});
   const [activeCategory, setActiveCategory] = useState(null);
   const [search, setSearch] = useState("");
 
-  const total = useMemo(() => {
-    return Object.values(selected).reduce(
-      (sum, item) => sum + item.price,
-      0
-    );
-  }, [selected]);
-
-  const completed = Object.keys(selected).length;
+  const total = useMemo(
+    () =>
+      Object.values(selected).reduce(
+        (sum, product) => sum + product.price,
+        0
+      ),
+    [selected]
+  );
 
   const filteredProducts = activeCategory
-    ? products[activeCategory].filter((product) =>
-        product.name.toLowerCase().includes(search.toLowerCase())
-      )
+    ? products
+        .filter((product) => product.category === activeCategory)
+        .filter((product) =>
+          product.name.toLowerCase().includes(search.toLowerCase())
+        )
     : [];
 
+  function getCompatibility(category, product) {
+    if (category === "Motherboard" && selected.CPU) {
+      if (product.socket !== selected.CPU.socket) {
+        return "غير متوافق مع المعالج";
+      }
+    }
+
+    if (category === "CPU" && selected.Motherboard) {
+      if (product.socket !== selected.Motherboard.socket) {
+        return "غير متوافق مع اللوحة الأم";
+      }
+    }
+
+    if (category === "RAM" && selected.Motherboard) {
+      if (product.ram !== selected.Motherboard.ram) {
+        return "نوع الذاكرة غير متوافق";
+      }
+    }
+
+    return null;
+  }
+
   function selectProduct(category, product) {
+    const error = getCompatibility(category, product);
+
+    if (error) return;
+
     setSelected((current) => ({
       ...current,
       [category]: product,
@@ -163,33 +74,13 @@ export default function Builder() {
 
   function removeProduct(category) {
     setSelected((current) => {
-      const next = { ...current };
-      delete next[category];
-      return next;
+      const copy = { ...current };
+      delete copy[category];
+      return copy;
     });
   }
 
-  function compatibility(category, product) {
-    if (category === "Motherboard" && selected.CPU) {
-      if (product.socket !== selected.CPU.socket) {
-        return "غير متوافق مع المعالج";
-      }
-    }
-
-    if (category === "RAM" && selected.Motherboard) {
-      if (product.ram !== selected.Motherboard.ram) {
-        return "نوع RAM غير متوافق";
-      }
-    }
-
-    if (category === "PSU" && selected.GPU) {
-      if (product.wattage < selected.GPU.power * 1.4) {
-        return "قدرة PSU منخفضة";
-      }
-    }
-
-    return null;
-  }
+  const completed = Object.keys(selected).length;
 
   return (
     <main
@@ -197,149 +88,97 @@ export default function Builder() {
       style={{
         minHeight: "100vh",
         background: "#f3f4f6",
+        padding: "40px 20px",
         color: "#111827",
       }}
     >
-      <div
-        style={{
-          maxWidth: "1250px",
-          margin: "0 auto",
-          padding: "35px 20px",
-        }}
-      >
-        <header style={{ marginBottom: "30px" }}>
-          <h1
-            style={{
-              fontSize: "36px",
-              margin: 0,
-              fontWeight: 800,
-            }}
-          >
-            PC Builder
-          </h1>
+      <div style={{ maxWidth: "1200px", margin: "auto" }}>
+        <h1 style={{ fontSize: "38px", marginBottom: "5px" }}>
+          PC Builder
+        </h1>
 
-          <p style={{ color: "#6b7280" }}>
-            ابنِ جهازك قطعة بقطعة وتحقق من التوافق
-          </p>
-        </header>
+        <p style={{ color: "#6b7280" }}>
+          ابنِ تجميعتك وتحقق من توافق القطع
+        </p>
 
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 320px",
-            gap: "24px",
-            alignItems: "start",
+            gap: "25px",
+            marginTop: "30px",
           }}
         >
           <section>
             {categories.map((category) => {
-              const selectedProduct = selected[category.id];
-              const warning = selectedProduct
-                ? compatibility(category.id, selectedProduct)
-                : null;
+              const product = selected[category.id];
 
               return (
                 <div
                   key={category.id}
                   style={{
                     background: "#fff",
-                    borderRadius: "14px",
                     padding: "20px",
+                    borderRadius: "14px",
                     marginBottom: "12px",
-                    border: warning
-                      ? "1px solid #ef4444"
-                      : "1px solid #e5e7eb",
+                    border: "1px solid #e5e7eb",
                   }}
                 >
                   <div
                     style={{
                       display: "flex",
-                      alignItems: "center",
                       justifyContent: "space-between",
-                      gap: "20px",
+                      alignItems: "center",
+                      gap: "15px",
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "15px",
-                      }}
-                    >
+                    <div>
+                      <strong style={{ fontSize: "17px" }}>
+                        {category.name}
+                      </strong>
+
                       <div
                         style={{
-                          width: "48px",
-                          height: "48px",
-                          borderRadius: "10px",
-                          background: "#f3f4f6",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "11px",
-                          fontWeight: 800,
+                          color: "#6b7280",
+                          marginTop: "6px",
                         }}
                       >
-                        {category.icon}
-                      </div>
-
-                      <div>
-                        <strong
-                          style={{
-                            display: "block",
-                            fontSize: "17px",
-                          }}
-                        >
-                          {category.name}
-                        </strong>
-
-                        <span
-                          style={{
-                            color: selectedProduct
-                              ? "#111827"
-                              : "#9ca3af",
-                            fontSize: "14px",
-                          }}
-                        >
-                          {selectedProduct
-                            ? selectedProduct.name
-                            : "لم يتم اختيار قطعة"}
-                        </span>
+                        {product
+                          ? product.name
+                          : "لم يتم اختيار قطعة"}
                       </div>
                     </div>
 
                     <div
                       style={{
                         display: "flex",
+                        gap: "10px",
                         alignItems: "center",
-                        gap: "12px",
                       }}
                     >
-                      {selectedProduct && (
-                        <strong>
-                          {selectedProduct.price.toLocaleString(
-                            "ar-SA"
-                          )}{" "}
-                          ريال
-                        </strong>
-                      )}
+                      {product && (
+                        <>
+                          <strong>
+                            {product.price.toLocaleString("ar-SA")} ريال
+                          </strong>
 
-                      {selectedProduct ? (
-                        <button
-                          onClick={() =>
-                            removeProduct(category.id)
-                          }
-                          style={{
-                            border: "none",
-                            background: "#fee2e2",
-                            color: "#b91c1c",
-                            padding: "9px 12px",
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                          }}
-                        >
-                          حذف
-                        </button>
-                      ) : null}
+                          <button
+                            onClick={() =>
+                              removeProduct(category.id)
+                            }
+                            style={{
+                              border: "none",
+                              background: "#fee2e2",
+                              color: "#b91c1c",
+                              padding: "9px 12px",
+                              borderRadius: "8px",
+                              cursor: "pointer",
+                            }}
+                          >
+                            حذف
+                          </button>
+                        </>
+                      )}
 
                       <button
                         onClick={() => {
@@ -355,25 +194,10 @@ export default function Builder() {
                           cursor: "pointer",
                         }}
                       >
-                        {selectedProduct ? "تغيير" : "اختيار"}
+                        {product ? "تغيير" : "اختيار"}
                       </button>
                     </div>
                   </div>
-
-                  {warning && (
-                    <div
-                      style={{
-                        marginTop: "14px",
-                        padding: "10px",
-                        background: "#fef2f2",
-                        color: "#b91c1c",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                      }}
-                    >
-                      ⚠️ {warning}
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -384,35 +208,19 @@ export default function Builder() {
               background: "#111827",
               color: "#fff",
               borderRadius: "16px",
-              padding: "24px",
+              padding: "25px",
+              height: "fit-content",
               position: "sticky",
               top: "20px",
             }}
           >
-            <div
-              style={{
-                color: "#9ca3af",
-                fontSize: "14px",
-              }}
-            >
+            <div style={{ color: "#9ca3af" }}>
               PCScout Builder
             </div>
 
-            <h2
-              style={{
-                fontSize: "18px",
-                marginTop: "8px",
-              }}
-            >
-              ملخص التجميعة
-            </h2>
+            <h2>ملخص التجميعة</h2>
 
-            <div
-              style={{
-                margin: "25px 0",
-                fontSize: "14px",
-              }}
-            >
+            <div style={{ color: "#d1d5db" }}>
               {completed} / {categories.length} قطع
             </div>
 
@@ -421,43 +229,33 @@ export default function Builder() {
                 height: "8px",
                 background: "#374151",
                 borderRadius: "20px",
-                overflow: "hidden",
+                marginTop: "15px",
               }}
             >
               <div
                 style={{
-                  width: `${(completed / categories.length) * 100}%`,
                   height: "100%",
+                  width: `${(completed / categories.length) * 100}%`,
                   background: "#22c55e",
+                  borderRadius: "20px",
                 }}
               />
             </div>
 
             <div
               style={{
-                marginTop: "30px",
-                paddingTop: "20px",
                 borderTop: "1px solid #374151",
+                marginTop: "25px",
+                paddingTop: "20px",
               }}
             >
-              <div
-                style={{
-                  color: "#9ca3af",
-                  fontSize: "14px",
-                }}
-              >
+              <div style={{ color: "#9ca3af" }}>
                 الإجمالي
               </div>
 
-              <div
-                style={{
-                  fontSize: "30px",
-                  fontWeight: 800,
-                  marginTop: "5px",
-                }}
-              >
+              <strong style={{ fontSize: "30px" }}>
                 {total.toLocaleString("ar-SA")} ريال
-              </div>
+              </strong>
             </div>
           </aside>
         </div>
@@ -469,30 +267,33 @@ export default function Builder() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.45)",
+            background: "rgba(0,0,0,.5)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             padding: "20px",
-            zIndex: 100,
+            zIndex: 10,
           }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
+              background: "#fff",
+              borderRadius: "18px",
+              padding: "25px",
               width: "100%",
               maxWidth: "650px",
               maxHeight: "80vh",
               overflow: "auto",
-              background: "#fff",
-              borderRadius: "18px",
-              padding: "25px",
             }}
           >
-            <h2 style={{ marginTop: 0 }}>
-              اختر {categories.find(
-                (c) => c.id === activeCategory
-              )?.name}
+            <h2>
+              اختر{" "}
+              {
+                categories.find(
+                  (c) => c.id === activeCategory
+                )?.name
+              }
             </h2>
 
             <input
@@ -506,33 +307,35 @@ export default function Builder() {
                 padding: "14px",
                 border: "1px solid #d1d5db",
                 borderRadius: "10px",
-                marginBottom: "15px",
                 fontSize: "16px",
+                marginBottom: "15px",
               }}
             />
 
             {filteredProducts.map((product) => {
-              const warning = compatibility(
+              const error = getCompatibility(
                 activeCategory,
                 product
               );
 
               return (
                 <button
-                  key={product.name}
+                  key={product.id}
+                  disabled={!!error}
                   onClick={() =>
-                    !warning &&
                     selectProduct(activeCategory, product)
                   }
                   style={{
                     width: "100%",
                     textAlign: "right",
-                    border: "1px solid #e5e7eb",
-                    background: warning ? "#fef2f2" : "#fff",
                     padding: "16px",
-                    borderRadius: "12px",
                     marginBottom: "10px",
-                    cursor: warning ? "not-allowed" : "pointer",
+                    borderRadius: "12px",
+                    border: "1px solid #e5e7eb",
+                    background: error ? "#fef2f2" : "#fff",
+                    cursor: error
+                      ? "not-allowed"
+                      : "pointer",
                   }}
                 >
                   <strong style={{ display: "block" }}>
@@ -543,10 +346,12 @@ export default function Builder() {
                     style={{
                       display: "block",
                       marginTop: "5px",
-                      color: warning ? "#b91c1c" : "#6b7280",
+                      color: error
+                        ? "#b91c1c"
+                        : "#6b7280",
                     }}
                   >
-                    {warning ||
+                    {error ||
                       `${product.price.toLocaleString(
                         "ar-SA"
                       )} ريال`}
