@@ -1,159 +1,296 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+
+const parts = {
+  CPU: [
+    { name: "AMD Ryzen 5 7600", price: 699, spec: "6 Cores / 12 Threads" },
+    { name: "AMD Ryzen 7 7800X3D", price: 1299, spec: "8 Cores / 16 Threads" },
+    { name: "Intel Core i5-14600K", price: 999, spec: "14 Cores / 20 Threads" },
+    { name: "Intel Core i7-14700K", price: 1399, spec: "20 Cores / 28 Threads" },
+  ],
+
+  "CPU Cooler": [
+    { name: "DeepCool AK400", price: 149, spec: "120mm Air Cooler" },
+    { name: "Thermalright Peerless Assassin 120", price: 189, spec: "Dual Tower" },
+    { name: "DeepCool LS520", price: 299, spec: "240mm AIO" },
+  ],
+
+  Motherboard: [
+    { name: "MSI B650 Gaming Plus", price: 699, spec: "AM5 / DDR5" },
+    { name: "ASUS TUF B650-Plus", price: 749, spec: "AM5 / DDR5" },
+    { name: "Gigabyte B650 Eagle", price: 629, spec: "AM5 / DDR5" },
+  ],
+
+  RAM: [
+    { name: "Kingston Fury 32GB DDR5 6000", price: 399, spec: "2x16GB / 6000MHz" },
+    { name: "Corsair Vengeance 32GB DDR5", price: 429, spec: "2x16GB / 6000MHz" },
+    { name: "G.Skill Trident Z5 32GB", price: 499, spec: "2x16GB / 6000MHz" },
+  ],
+
+  GPU: [
+    { name: "RTX 5060 8GB", price: 1399, spec: "NVIDIA / 8GB" },
+    { name: "RTX 5070 12GB", price: 2399, spec: "NVIDIA / 12GB" },
+    { name: "RX 9070 16GB", price: 2299, spec: "AMD / 16GB" },
+    { name: "RTX 5070 Ti 16GB", price: 2999, spec: "NVIDIA / 16GB" },
+  ],
+
+  Storage: [
+    { name: "Kingston NV3 1TB", price: 249, spec: "PCIe 4.0 NVMe" },
+    { name: "Samsung 990 EVO 1TB", price: 329, spec: "PCIe 4.0 NVMe" },
+    { name: "WD Black SN850X 2TB", price: 549, spec: "PCIe 4.0 NVMe" },
+  ],
+
+  PSU: [
+    { name: "Corsair RM750e", price: 399, spec: "750W / 80+ Gold" },
+    { name: "MSI MAG A850GL", price: 449, spec: "850W / 80+ Gold" },
+    { name: "Corsair RM1000e", price: 599, spec: "1000W / 80+ Gold" },
+  ],
+
+  Case: [
+    { name: "NZXT H5 Flow", price: 299, spec: "ATX / Airflow" },
+    { name: "Lian Li Lancool 216", price: 449, spec: "ATX / Airflow" },
+    { name: "Corsair 4000D Airflow", price: 399, spec: "ATX / Airflow" },
+  ],
+};
 
 const categories = [
-  { name: "المعالج", key: "CPU", icon: "▣" },
-  { name: "مبرد المعالج", key: "Cooler", icon: "❄" },
-  { name: "اللوحة الأم", key: "Motherboard", icon: "▤" },
-  { name: "الذاكرة", key: "RAM", icon: "▥" },
-  { name: "كرت الشاشة", key: "GPU", icon: "▰" },
-  { name: "التخزين", key: "Storage", icon: "▤" },
-  { name: "مزود الطاقة", key: "PSU", icon: "⚡" },
-  { name: "الكيس", key: "Case", icon: "▥" },
+  ["CPU", "المعالج"],
+  ["CPU Cooler", "مبرد المعالج"],
+  ["Motherboard", "اللوحة الأم"],
+  ["RAM", "الذاكرة"],
+  ["GPU", "كرت الشاشة"],
+  ["Storage", "التخزين"],
+  ["PSU", "مزود الطاقة"],
+  ["Case", "الكيس"],
 ];
 
 export default function Home() {
-  const [parts, setParts] = useState({});
-  const [aiOpen, setAiOpen] = useState(false);
+  const [selected, setSelected] = useState({});
+  const [active, setActive] = useState(null);
+  const [search, setSearch] = useState("");
 
-  const selectedCount = Object.keys(parts).length;
+  const total = useMemo(() => {
+    return Object.values(selected).reduce(
+      (sum, item) => sum + item.price,
+      0
+    );
+  }, [selected]);
+
+  const products = active
+    ? parts[active].filter((item) =>
+        item.name.toLowerCase().includes(search.toLowerCase())
+      )
+    : [];
+
+  function chooseProduct(product) {
+    setSelected({
+      ...selected,
+      [active]: product,
+    });
+
+    setActive(null);
+    setSearch("");
+  }
 
   return (
-    <main className="site">
+    <main className="app">
       <header className="header">
-        <div className="headerInner">
-          <div className="logo">
-            PC<span>Scout</span>
-          </div>
-
-          <nav>
-            <a className="active">منشئ الكمبيوتر</a>
-            <a>الأسعار</a>
-            <a>التجميعات</a>
-            <a>المقارنة</a>
-          </nav>
-
-          <button className="login">تسجيل الدخول</button>
+        <div className="logo">
+          PC<span>Scout</span>
         </div>
+
+        <nav>
+          <a className="active">PC Builder</a>
+          <a>الأسعار</a>
+          <a>التجميعات</a>
+          <a>المقارنة</a>
+        </nav>
+
+        <button className="account">حسابي</button>
       </header>
 
-      <section className="hero">
-        <div>
-          <div className="badge">PCSCOUT BUILDER</div>
-
-          <h1>
-            ابنِ جهازك
-            <br />
-            <span>بذكاء.</span>
-          </h1>
-
-          <p>
-            اختر قطع جهازك، وسنساعدك في العثور على أفضل
-            الأسعار والتأكد من توافق جميع القطع.
-          </p>
-
-          <button
-            className="aiButton"
-            onClick={() => setAiOpen(!aiOpen)}
-          >
-            🤖 ابنِ لي تجميعة بالذكاء الاصطناعي
-          </button>
-        </div>
-
-        <div className="summary">
-          <div className="summaryTop">
-            <span>تجميعتي</span>
-            <strong>{selectedCount}/8</strong>
-          </div>
-
-          <div className="progress">
-            <div
-              style={{
-                width: `${(selectedCount / 8) * 100}%`,
-              }}
-            />
-          </div>
-
-          <div className="totalLabel">السعر التقريبي</div>
-
-          <div className="total">0 <small>ر.س</small></div>
-
-          <div className="compatibility">
-            ✓ جاهز لاختيار القطع
-          </div>
-        </div>
-      </section>
-
-      {aiOpen && (
-        <section className="aiPanel">
-          <div>
-            <span className="aiIcon">🤖</span>
-          </div>
-
-          <div className="aiContent">
-            <h2>PCScout AI</h2>
-
-            <p>
-              اكتب المواصفات التي تريدها، مثل:
-              <br />
-              "أبغى تجميعة ألعاب 1440p بميزانية 6000 ريال"
-            </p>
-
-            <div className="aiInput">
-              <input placeholder="اكتب طلبك هنا..." />
-              <button>إنشاء التجميعة</button>
+      <div className="layout">
+        <section className="content">
+          <div className="pageTitle">
+            <div>
+              <h1>PC Builder</h1>
+              <p>ابنِ جهازك قطعة بقطعة</p>
             </div>
+
+            <button
+              className="reset"
+              onClick={() => setSelected({})}
+            >
+              مسح التجميعة
+            </button>
+          </div>
+
+          <div className="aiBox">
+            <div className="aiIcon">🤖</div>
+
+            <div>
+              <strong>PCScout AI</strong>
+              <p>
+                اكتب ميزانيتك واحتياجك، وسنساعدك في بناء التجميعة.
+              </p>
+            </div>
+
+            <button>بناء بالذكاء الاصطناعي</button>
+          </div>
+
+          <div className="partsList">
+            {categories.map(([key, name]) => {
+              const product = selected[key];
+
+              return (
+                <div className="partRow" key={key}>
+                  <div className="partCategory">
+                    <div className="partNumber">
+                      {categories.findIndex((x) => x[0] === key) + 1}
+                    </div>
+
+                    <div>
+                      <strong>{name}</strong>
+                      <small>{key}</small>
+                    </div>
+                  </div>
+
+                  {product ? (
+                    <div className="selectedProduct">
+                      <div>
+                        <strong>{product.name}</strong>
+                        <small>{product.spec}</small>
+                      </div>
+
+                      <div className="productPrice">
+                        {product.price.toLocaleString()} ر.س
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          setActive(key);
+                          setSearch("");
+                        }}
+                      >
+                        تغيير
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      className="choose"
+                      onClick={() => {
+                        setActive(key);
+                        setSearch("");
+                      }}
+                    >
+                      <span>＋</span>
+                      اختيار {name}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </section>
-      )}
 
-      <section className="builder">
-        <div className="builderHeader">
-          <div>
-            <h2>مكونات الكمبيوتر</h2>
-            <p>اختر القطع التي تريد إضافتها إلى تجميعتك</p>
+        <aside className="sidebar">
+          <div className="summary">
+            <div className="summaryHeader">
+              <strong>تجميعتي</strong>
+              <span>{Object.keys(selected).length}/8</span>
+            </div>
+
+            <div className="progress">
+              <div
+                style={{
+                  width: `${(Object.keys(selected).length / 8) * 100}%`,
+                }}
+              />
+            </div>
+
+            <div className="summaryTotal">
+              <small>الإجمالي التقريبي</small>
+              <strong>{total.toLocaleString()} ر.س</strong>
+            </div>
+
+            <div className="check">
+              ✓ لا توجد مشاكل توافق حتى الآن
+            </div>
+
+            <button className="buildButton">
+              عرض التجميعة
+            </button>
           </div>
 
-          <button className="clear">مسح الكل</button>
-        </div>
+          <div className="stores">
+            <strong>المتاجر</strong>
 
-        <div className="parts">
-          {categories.map((category) => (
-            <PartRow
-              key={category.key}
-              category={category}
-              selected={parts[category.key]}
-              onSelect={() =>
-                setParts({
-                  ...parts,
-                  [category.key]: true,
-                })
-              }
+            <div>Amazon.sa <span>—</span></div>
+            <div>Noon <span>—</span></div>
+            <div>Trendyol <span>—</span></div>
+
+            <small>
+              سيتم جلب الأسعار الحقيقية لاحقًا
+            </small>
+          </div>
+        </aside>
+      </div>
+
+      {active && (
+        <div className="overlay" onClick={() => setActive(null)}>
+          <div
+            className="modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modalHeader">
+              <div>
+                <small>اختيار القطعة</small>
+                <h2>
+                  {categories.find((x) => x[0] === active)?.[1]}
+                </h2>
+              </div>
+
+              <button onClick={() => setActive(null)}>×</button>
+            </div>
+
+            <input
+              className="search"
+              placeholder="ابحث عن قطعة..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              autoFocus
             />
-          ))}
-        </div>
-      </section>
 
-      <section className="stores">
-        <div className="storesTitle">
-          <h2>نقارن لك الأسعار</h2>
-          <p>من أشهر المتاجر في المنطقة</p>
-        </div>
+            <div className="products">
+              {products.map((product) => (
+                <div className="product" key={product.name}>
+                  <div className="productInfo">
+                    <strong>{product.name}</strong>
+                    <small>{product.spec}</small>
+                  </div>
 
-        <div className="storeGrid">
-          <Store name="Amazon.sa" logo="A" />
-          <Store name="Noon" logo="N" />
-          <Store name="Trendyol" logo="T" />
-        </div>
-      </section>
+                  <strong>
+                    {product.price.toLocaleString()} ر.س
+                  </strong>
 
-      <footer>
-        <strong>
-          PC<span>Scout</span>
-        </strong>
-        <p>ابنِ جهازك. قارن الأسعار. ادفع أقل.</p>
-      </footer>
+                  <button
+                    onClick={() => chooseProduct(product)}
+                  >
+                    إضافة
+                  </button>
+                </div>
+              ))}
+
+              {products.length === 0 && (
+                <div className="empty">
+                  لا توجد نتائج
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         * {
@@ -162,141 +299,253 @@ export default function Home() {
 
         body {
           margin: 0;
-        }
-
-        .site {
-          min-height: 100vh;
-          background: #f5f6f8;
-          color: #15181d;
+          background: #f4f5f7;
           font-family: Arial, sans-serif;
         }
 
-        .header {
-          background: white;
-          border-bottom: 1px solid #e4e6e9;
+        button {
+          font-family: inherit;
         }
 
-        .headerInner {
-          max-width: 1200px;
-          margin: auto;
-          height: 72px;
-          padding: 0 20px;
+        .app {
+          min-height: 100vh;
+          color: #16191d;
+          direction: rtl;
+        }
+
+        .header {
+          height: 70px;
+          background: white;
+          border-bottom: 1px solid #e2e5e8;
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          padding: 0 5%;
+          gap: 70px;
         }
 
         .logo {
           font-size: 25px;
           font-weight: 900;
-          letter-spacing: -1px;
+          direction: ltr;
         }
 
-        .logo span,
-        footer span {
+        .logo span {
           color: #16a34a;
         }
 
         nav {
           display: flex;
           gap: 30px;
+          flex: 1;
           height: 100%;
           align-items: center;
         }
 
         nav a {
-          color: #6b7280;
+          color: #747b84;
           font-size: 14px;
           cursor: pointer;
         }
 
         nav .active {
-          color: #111827;
+          color: #111;
           font-weight: 700;
         }
 
-        .login {
-          border: 1px solid #dfe2e6;
+        .account,
+        .reset {
           background: white;
-          padding: 10px 18px;
-          border-radius: 7px;
+          border: 1px solid #dfe2e6;
+          padding: 9px 16px;
+          border-radius: 6px;
           cursor: pointer;
         }
 
-        .hero {
-          max-width: 1200px;
+        .layout {
+          max-width: 1250px;
           margin: auto;
-          padding: 70px 20px 50px;
+          padding: 45px 20px;
           display: grid;
-          grid-template-columns: 1fr 340px;
-          gap: 70px;
-          align-items: center;
+          grid-template-columns: 1fr 330px;
+          gap: 25px;
+          direction: ltr;
         }
 
-        .badge {
-          display: inline-block;
-          background: #e8f7ed;
-          color: #15803d;
-          padding: 7px 12px;
-          border-radius: 5px;
-          font-size: 11px;
-          font-weight: 800;
-          letter-spacing: 1px;
+        .content,
+        .sidebar {
+          direction: rtl;
+        }
+
+        .pageTitle {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 25px;
         }
 
         h1 {
-          font-size: 64px;
-          line-height: 1.05;
-          margin: 18px 0;
-          letter-spacing: -3px;
+          margin: 0;
+          font-size: 34px;
         }
 
-        h1 span {
-          color: #16a34a;
+        .pageTitle p {
+          margin: 8px 0;
+          color: #858c95;
         }
 
-        .hero p {
-          color: #6b7280;
-          font-size: 17px;
-          line-height: 1.9;
-          max-width: 600px;
-        }
-
-        .aiButton {
-          margin-top: 20px;
-          background: #15181d;
+        .aiBox {
+          background: #11151b;
           color: white;
+          padding: 22px;
+          border-radius: 9px;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 20px;
+        }
+
+        .aiIcon {
+          font-size: 28px;
+        }
+
+        .aiBox p {
+          color: #aeb5bf;
+          margin: 7px 0 0;
+          font-size: 13px;
+        }
+
+        .aiBox button {
+          margin-right: auto;
+          background: #22c55e;
+          color: #061009;
           border: 0;
-          border-radius: 7px;
-          padding: 14px 20px;
+          padding: 11px 16px;
+          border-radius: 6px;
           font-weight: 700;
+          cursor: pointer;
+        }
+
+        .partsList {
+          background: white;
+          border: 1px solid #e0e3e7;
+          border-radius: 9px;
+          overflow: hidden;
+        }
+
+        .partRow {
+          min-height: 105px;
+          padding: 18px 22px;
+          border-bottom: 1px solid #eceef0;
+          display: flex;
+          align-items: center;
+          gap: 25px;
+        }
+
+        .partRow:last-child {
+          border-bottom: 0;
+        }
+
+        .partCategory {
+          width: 190px;
+          display: flex;
+          align-items: center;
+          gap: 13px;
+          flex-shrink: 0;
+        }
+
+        .partNumber {
+          width: 38px;
+          height: 38px;
+          background: #f0f2f4;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #6b7280;
+          font-weight: 700;
+        }
+
+        .partCategory strong,
+        .partCategory small,
+        .selectedProduct strong,
+        .selectedProduct small {
+          display: block;
+        }
+
+        .partCategory small,
+        .selectedProduct small {
+          color: #9299a2;
+          margin-top: 5px;
+          font-size: 12px;
+        }
+
+        .choose {
+          flex: 1;
+          text-align: right;
+          background: #fafbfc;
+          border: 1px dashed #cfd4d9;
+          border-radius: 7px;
+          padding: 16px;
+          color: #666d76;
+          cursor: pointer;
+        }
+
+        .choose:hover {
+          border-color: #16a34a;
+          color: #15803d;
+        }
+
+        .choose span {
+          font-size: 20px;
+          margin-left: 8px;
+        }
+
+        .selectedProduct {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          gap: 20px;
+        }
+
+        .selectedProduct > div:first-child {
+          flex: 1;
+        }
+
+        .productPrice {
+          font-weight: 800;
+        }
+
+        .selectedProduct button {
+          background: white;
+          border: 1px solid #d8dce0;
+          border-radius: 5px;
+          padding: 8px 14px;
           cursor: pointer;
         }
 
         .summary {
           background: white;
-          border: 1px solid #e1e4e8;
-          border-radius: 10px;
-          padding: 25px;
-          box-shadow: 0 8px 30px rgba(0,0,0,.04);
+          border: 1px solid #e0e3e7;
+          border-radius: 9px;
+          padding: 23px;
+          position: sticky;
+          top: 20px;
         }
 
-        .summaryTop {
+        .summaryHeader {
           display: flex;
           justify-content: space-between;
-          color: #6b7280;
-          font-size: 14px;
         }
 
-        .summaryTop strong {
-          color: #15181d;
+        .summaryHeader span {
+          color: #7b828b;
         }
 
         .progress {
           height: 6px;
           background: #edf0f2;
+          margin: 15px 0 30px;
           border-radius: 10px;
-          margin: 15px 0 35px;
           overflow: hidden;
         }
 
@@ -306,290 +555,218 @@ export default function Home() {
           transition: .3s;
         }
 
-        .totalLabel {
-          color: #9ca3af;
-          font-size: 13px;
+        .summaryTotal small {
+          color: #8d949d;
+          display: block;
         }
 
-        .total {
-          font-size: 36px;
-          font-weight: 900;
+        .summaryTotal strong {
+          display: block;
+          font-size: 30px;
           margin-top: 5px;
         }
 
-        .total small {
-          font-size: 15px;
-          color: #6b7280;
-        }
-
-        .compatibility {
-          margin-top: 20px;
+        .check {
           background: #edf9f0;
           color: #15803d;
           padding: 12px;
-          text-align: center;
           border-radius: 6px;
-          font-size: 13px;
-        }
-
-        .aiPanel {
-          max-width: 1200px;
-          margin: 0 auto 30px;
-          background: #11151b;
-          color: white;
-          border-radius: 10px;
-          padding: 30px;
-          display: flex;
-          gap: 20px;
-        }
-
-        .aiIcon {
-          font-size: 30px;
-        }
-
-        .aiContent {
-          flex: 1;
-        }
-
-        .aiContent h2 {
-          margin-top: 0;
-        }
-
-        .aiContent p {
-          color: #aeb4bd;
-          line-height: 1.8;
-        }
-
-        .aiInput {
-          display: flex;
-          gap: 10px;
           margin-top: 20px;
+          font-size: 12px;
         }
 
-        .aiInput input {
-          flex: 1;
-          background: #20252c;
+        .buildButton {
+          width: 100%;
+          margin-top: 15px;
+          background: #15191e;
           color: white;
-          border: 1px solid #343a43;
-          border-radius: 6px;
-          padding: 14px;
-          outline: none;
-        }
-
-        .aiInput button {
-          background: #22c55e;
           border: 0;
           border-radius: 6px;
-          padding: 0 20px;
+          padding: 13px;
+          cursor: pointer;
           font-weight: 700;
-          cursor: pointer;
-        }
-
-        .builder {
-          max-width: 1200px;
-          margin: auto;
-          padding: 30px 20px 80px;
-        }
-
-        .builderHeader {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-        }
-
-        .builderHeader h2,
-        .stores h2 {
-          margin-bottom: 5px;
-        }
-
-        .builderHeader p,
-        .storesTitle p {
-          color: #8a919b;
-          margin-top: 0;
-        }
-
-        .clear {
-          background: white;
-          border: 1px solid #ddd;
-          border-radius: 6px;
-          padding: 9px 15px;
-          cursor: pointer;
-        }
-
-        .parts {
-          background: white;
-          border: 1px solid #e1e4e8;
-          border-radius: 10px;
-          overflow: hidden;
-        }
-
-        .part {
-          min-height: 92px;
-          display: grid;
-          grid-template-columns: 55px 1fr 180px;
-          align-items: center;
-          gap: 20px;
-          padding: 15px 25px;
-          border-bottom: 1px solid #edf0f2;
-        }
-
-        .part:last-child {
-          border-bottom: 0;
-        }
-
-        .partIcon {
-          width: 45px;
-          height: 45px;
-          border-radius: 7px;
-          background: #f1f3f5;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #555;
-          font-size: 20px;
-        }
-
-        .partName {
-          font-weight: 700;
-        }
-
-        .partDesc {
-          color: #9ca3af;
-          font-size: 13px;
-          margin-top: 6px;
-        }
-
-        .choose {
-          border: 1px solid #d7dbe0;
-          background: white;
-          border-radius: 6px;
-          padding: 11px;
-          cursor: pointer;
-          font-weight: 600;
-        }
-
-        .choose:hover {
-          border-color: #16a34a;
-          color: #15803d;
         }
 
         .stores {
           background: white;
-          border-top: 1px solid #e3e5e8;
-          border-bottom: 1px solid #e3e5e8;
-          padding: 60px 20px;
-        }
-
-        .storesTitle {
-          max-width: 1200px;
-          margin: auto;
-        }
-
-        .storeGrid {
-          max-width: 1200px;
-          margin: 25px auto 0;
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 15px;
-        }
-
-        .store {
-          border: 1px solid #e2e5e8;
-          border-radius: 8px;
+          border: 1px solid #e0e3e7;
+          border-radius: 9px;
+          margin-top: 15px;
           padding: 20px;
-          display: flex;
-          align-items: center;
-          gap: 15px;
-          background: #fafafa;
         }
 
-        .storeLogo {
-          width: 42px;
-          height: 42px;
-          border-radius: 7px;
-          background: #15181d;
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 900;
+        .stores > strong {
+          display: block;
+          margin-bottom: 15px;
         }
 
-        footer {
-          max-width: 1200px;
-          margin: auto;
-          padding: 40px 20px;
-          color: #6b7280;
-        }
-
-        footer strong {
-          color: #15181d;
-          font-size: 20px;
-        }
-
-        footer p {
+        .stores div {
+          padding: 12px 0;
+          border-top: 1px solid #eee;
           font-size: 13px;
         }
 
-        @media (max-width: 800px) {
+        .stores div span {
+          float: left;
+          color: #aaa;
+        }
+
+        .stores small {
+          color: #999;
+          display: block;
+          margin-top: 10px;
+          line-height: 1.7;
+        }
+
+        .overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,.55);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          z-index: 10;
+        }
+
+        .modal {
+          width: 700px;
+          max-width: 100%;
+          max-height: 85vh;
+          overflow: auto;
+          background: white;
+          border-radius: 10px;
+          padding: 25px;
+        }
+
+        .modalHeader {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .modalHeader small {
+          color: #8b929a;
+        }
+
+        .modalHeader h2 {
+          margin: 7px 0 20px;
+        }
+
+        .modalHeader button {
+          border: 0;
+          background: #f0f1f2;
+          width: 35px;
+          height: 35px;
+          border-radius: 50%;
+          font-size: 22px;
+          cursor: pointer;
+        }
+
+        .search {
+          width: 100%;
+          padding: 14px;
+          border: 1px solid #dfe3e7;
+          border-radius: 7px;
+          outline: none;
+          font-size: 15px;
+          direction: rtl;
+        }
+
+        .search:focus {
+          border-color: #16a34a;
+        }
+
+        .products {
+          margin-top: 15px;
+        }
+
+        .product {
+          border: 1px solid #e4e7ea;
+          border-radius: 7px;
+          padding: 17px;
+          margin-bottom: 10px;
+          display: flex;
+          align-items: center;
+          gap: 20px;
+        }
+
+        .productInfo {
+          flex: 1;
+        }
+
+        .productInfo strong,
+        .productInfo small {
+          display: block;
+        }
+
+        .productInfo small {
+          color: #9299a2;
+          margin-top: 5px;
+        }
+
+        .product button {
+          background: #16a34a;
+          color: white;
+          border: 0;
+          padding: 9px 18px;
+          border-radius: 5px;
+          cursor: pointer;
+          font-weight: 700;
+        }
+
+        .empty {
+          padding: 40px;
+          text-align: center;
+          color: #999;
+        }
+
+        @media (max-width: 900px) {
+          .layout {
+            grid-template-columns: 1fr;
+          }
+
+          .sidebar {
+            order: -1;
+          }
+
+          .summary {
+            position: static;
+          }
+        }
+
+        @media (max-width: 650px) {
           nav {
             display: none;
           }
 
-          .hero {
-            grid-template-columns: 1fr;
-            gap: 30px;
+          .header {
+            justify-content: space-between;
           }
 
-          h1 {
-            font-size: 48px;
+          .aiBox {
+            flex-wrap: wrap;
           }
 
-          .part {
-            grid-template-columns: 45px 1fr;
+          .aiBox button {
+            margin-right: 0;
+            width: 100%;
           }
 
-          .choose {
-            grid-column: 2;
+          .partRow {
+            display: block;
           }
 
-          .storeGrid {
-            grid-template-columns: 1fr;
+          .partCategory {
+            width: 100%;
+            margin-bottom: 12px;
+          }
+
+          .selectedProduct {
+            gap: 10px;
           }
         }
       `}</style>
     </main>
-  );
-}
-
-function PartRow({ category, selected, onSelect }) {
-  return (
-    <div className="part">
-      <div className="partIcon">{category.icon}</div>
-
-      <div>
-        <div className="partName">{category.name}</div>
-
-        <div className="partDesc">
-          {selected
-            ? "تمت إضافة القطعة"
-            : "لم يتم اختيار قطعة بعد"}
-        </div>
-      </div>
-
-      <button className="choose" onClick={onSelect}>
-        {selected ? "✓ تمت الإضافة" : "اختيار قطعة"}
-      </button>
-    </div>
-  );
-}
-
-function Store({ name, logo }) {
-  return (
-    <div className="store">
-      <div className="storeLogo">{logo}</div>
-      <strong>{name}</strong>
-    </div>
   );
 }
