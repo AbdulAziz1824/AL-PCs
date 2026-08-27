@@ -13,9 +13,7 @@ export async function GET(request) {
     });
   }
 
-  const words = query
-    .split(/\s+/)
-    .filter(Boolean);
+  const words = query.split(/\s+/).filter(Boolean);
 
   const results = products
     .map((product) => {
@@ -33,8 +31,14 @@ export async function GET(request) {
         searchableText.includes(word)
       );
 
+      const offers = [...product.offers].sort(
+        (a, b) => a.price - b.price
+      );
+
       return {
         ...product,
+        offers,
+        cheapest: offers[0],
         score: matchedWords.length
       };
     })
