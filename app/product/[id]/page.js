@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { products } from "@/lib/products";
-import { offers } from "@/lib/offers";
 
 export default async function ProductPage({ params }) {
   const { id } = await params;
@@ -17,62 +16,22 @@ export default async function ProductPage({ params }) {
           minHeight: "100vh",
           background: "#f5f6f8",
           padding: "60px 20px",
-          textAlign: "center",
           color: "#111827",
+          textAlign: "center",
         }}
       >
         <h1>المنتج غير موجود</h1>
 
         <p style={{ color: "#6b7280" }}>
-          لم يتم العثور على المنتج المطلوب.
+          ID المطلوب: {id}
         </p>
 
-        <Link
-          href="/"
-          style={{
-            display: "inline-block",
-            marginTop: "20px",
-            background: "#111827",
-            color: "#fff",
-            padding: "12px 20px",
-            borderRadius: "10px",
-            textDecoration: "none",
-          }}
-        >
+        <Link href="/">
           العودة للرئيسية
         </Link>
       </main>
     );
   }
-
-  const productOffers = offers
-    .filter(
-      (offer) =>
-        String(offer.productId) === String(product.id) &&
-        offer.available === true
-    )
-    .sort((a, b) => a.price - b.price);
-
-  const cheapest = productOffers[0] || null;
-
-  const specifications = Object.entries(product)
-    .filter(
-      ([key]) =>
-        ![
-          "id",
-          "name",
-          "category",
-          "brand",
-          "model",
-          "price",
-        ].includes(key)
-      )
-      .filter(
-        ([, value]) =>
-          value !== null &&
-          value !== undefined &&
-          typeof value !== "object"
-      );
 
   return (
     <main
@@ -80,14 +39,14 @@ export default async function ProductPage({ params }) {
       style={{
         minHeight: "100vh",
         background: "#f5f6f8",
+        padding: "40px 20px",
         color: "#111827",
-        padding: "40px 20px 60px",
       }}
     >
       <div
         style={{
-          maxWidth: "1100px",
-          margin: "0 auto",
+          maxWidth: "1000px",
+          margin: "auto",
         }}
       >
         <Link
@@ -100,11 +59,11 @@ export default async function ProductPage({ params }) {
           ← العودة للرئيسية
         </Link>
 
-        <section
+        <div
           style={{
             background: "#fff",
             borderRadius: "20px",
-            padding: "32px",
+            padding: "35px",
             marginTop: "25px",
             border: "1px solid #e5e7eb",
           }}
@@ -112,7 +71,6 @@ export default async function ProductPage({ params }) {
           <div
             style={{
               color: "#6b7280",
-              fontSize: "14px",
               marginBottom: "8px",
             }}
           >
@@ -128,169 +86,73 @@ export default async function ProductPage({ params }) {
             {product.name}
           </h1>
 
-          <p
-            style={{
-              color: "#6b7280",
-              margin: 0,
-            }}
-          >
+          <p style={{ color: "#6b7280" }}>
             {product.brand} · {product.model}
           </p>
 
           <div
             style={{
-              marginTop: "30px",
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: "14px",
+              marginTop: "25px",
+              fontSize: "30px",
+              fontWeight: 800,
             }}
           >
-            {specifications.map(([key, value]) => (
-              <div
-                key={key}
-                style={{
-                  background: "#f3f4f6",
-                  padding: "18px",
-                  borderRadius: "12px",
-                }}
-              >
-                <div
-                  style={{
-                    color: "#6b7280",
-                    fontSize: "13px",
-                  }}
-                >
-                  {key}
-                </div>
-
-                <strong
-                  style={{
-                    display: "block",
-                    marginTop: "6px",
-                    fontSize: "16px",
-                  }}
-                >
-                  {String(value)}
-                </strong>
-              </div>
-            ))}
+            {product.price?.toLocaleString("ar-SA")} ريال
           </div>
-        </section>
 
-        <section
-          style={{
-            background: "#fff",
-            borderRadius: "20px",
-            padding: "32px",
-            marginTop: "20px",
-            border: "1px solid #e5e7eb",
-          }}
-        >
-          <h2 style={{ marginTop: 0 }}>
-            مقارنة الأسعار
-          </h2>
+          <div
+            style={{
+              marginTop: "30px",
+              padding: "20px",
+              background: "#f3f4f6",
+              borderRadius: "12px",
+            }}
+          >
+            <h2>المواصفات</h2>
 
-          {productOffers.length === 0 ? (
-            <p style={{ color: "#6b7280" }}>
-              لا توجد عروض متاحة حاليًا.
-            </p>
-          ) : (
-            <div
-              style={{
-                marginTop: "20px",
-                border: "1px solid #e5e7eb",
-                borderRadius: "14px",
-                overflow: "hidden",
-              }}
-            >
-              {productOffers.map((offer, index) => (
+            {Object.entries(product).map(([key, value]) => {
+              if (
+                ["id", "name", "category", "brand", "model", "price"].includes(
+                  key
+                )
+              ) {
+                return null;
+              }
+
+              return (
                 <div
-                  key={offer.id}
+                  key={key}
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "18px 20px",
-                    borderTop:
-                      index === 0
-                        ? "none"
-                        : "1px solid #e5e7eb",
+                    padding: "10px 0",
+                    borderBottom: "1px solid #ddd",
                   }}
                 >
-                  <div>
-                    <strong>{offer.store}</strong>
-
-                    {offer.id === cheapest.id && (
-                      <span
-                        style={{
-                          display: "inline-block",
-                          marginRight: "10px",
-                          background: "#dcfce7",
-                          color: "#15803d",
-                          padding: "5px 9px",
-                          borderRadius: "6px",
-                          fontSize: "12px",
-                        }}
-                      >
-                        الأرخص
-                      </span>
-                    )}
-                  </div>
-
-                  <strong style={{ fontSize: "18px" }}>
-                    {offer.price.toLocaleString("ar-SA")} ريال
-                  </strong>
+                  <strong>{key}: </strong>
+                  {typeof value === "object"
+                    ? JSON.stringify(value)
+                    : String(value)}
                 </div>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
 
-          {cheapest && (
-            <div
-              style={{
-                marginTop: "20px",
-                padding: "20px",
-                background: "#ecfdf5",
-                color: "#047857",
-                borderRadius: "12px",
-              }}
-            >
-              <div>أفضل سعر حاليًا</div>
-
-              <strong
-                style={{
-                  display: "block",
-                  fontSize: "30px",
-                  marginTop: "5px",
-                }}
-              >
-                {cheapest.price.toLocaleString("ar-SA")} ريال
-              </strong>
-
-              <div style={{ marginTop: "5px" }}>
-                لدى {cheapest.store}
-              </div>
-            </div>
-          )}
-        </section>
-
-        <Link
-          href={`/builder?product=${product.id}`}
-          style={{
-            display: "block",
-            marginTop: "20px",
-            padding: "17px",
-            textAlign: "center",
-            background: "#111827",
-            color: "#fff",
-            borderRadius: "12px",
-            textDecoration: "none",
-            fontWeight: 700,
-          }}
-        >
-          + أضف إلى التجميعة
-        </Link>
+          <Link
+            href={`/builder?product=${product.id}`}
+            style={{
+              display: "block",
+              textAlign: "center",
+              marginTop: "25px",
+              padding: "15px",
+              background: "#111827",
+              color: "#fff",
+              borderRadius: "10px",
+              textDecoration: "none",
+              fontWeight: 700,
+            }}
+          >
+            + أضف إلى التجميعة
+          </Link>
+        </div>
       </div>
     </main>
   );
