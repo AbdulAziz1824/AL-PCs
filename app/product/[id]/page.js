@@ -2,10 +2,11 @@ import Link from "next/link";
 import { products } from "@/lib/products";
 
 export default async function ProductPage({ params }) {
-  const { id } = await params;
+  const paramsData = await params;
+  const id = String(paramsData.id);
 
   const product = products.find(
-    (item) => String(item.id) === String(id)
+    (item) => String(item.id) === id
   );
 
   if (!product) {
@@ -17,18 +18,54 @@ export default async function ProductPage({ params }) {
           background: "#f5f6f8",
           padding: "60px 20px",
           color: "#111827",
-          textAlign: "center",
         }}
       >
-        <h1>المنتج غير موجود</h1>
+        <div
+          style={{
+            maxWidth: "700px",
+            margin: "auto",
+            background: "#fff",
+            padding: "30px",
+            borderRadius: "18px",
+          }}
+        >
+          <h1>المنتج غير موجود</h1>
 
-        <p style={{ color: "#6b7280" }}>
-          ID المطلوب: {id}
-        </p>
+          <p>
+            الـ ID المطلوب:
+            <strong> {id}</strong>
+          </p>
 
-        <Link href="/">
-          العودة للرئيسية
-        </Link>
+          <hr />
+
+          <h3>المنتجات الموجودة حاليًا:</h3>
+
+          {products.map((item) => (
+            <div
+              key={item.id}
+              style={{
+                padding: "12px",
+                marginTop: "8px",
+                background: "#f3f4f6",
+                borderRadius: "8px",
+              }}
+            >
+              ID: <strong>{String(item.id)}</strong>
+              {" — "}
+              {item.name}
+            </div>
+          ))}
+
+          <Link
+            href="/"
+            style={{
+              display: "inline-block",
+              marginTop: "20px",
+            }}
+          >
+            العودة للرئيسية
+          </Link>
+        </div>
       </main>
     );
   }
@@ -59,28 +96,22 @@ export default async function ProductPage({ params }) {
           ← العودة للرئيسية
         </Link>
 
-        <div
+        <section
           style={{
             background: "#fff",
             borderRadius: "20px",
             padding: "35px",
             marginTop: "25px",
-            border: "1px solid #e5e7eb",
           }}
         >
-          <div
-            style={{
-              color: "#6b7280",
-              marginBottom: "8px",
-            }}
-          >
+          <div style={{ color: "#6b7280" }}>
             {product.category}
           </div>
 
           <h1
             style={{
               fontSize: "36px",
-              margin: "0 0 10px",
+              margin: "10px 0",
             }}
           >
             {product.name}
@@ -92,29 +123,29 @@ export default async function ProductPage({ params }) {
 
           <div
             style={{
-              marginTop: "25px",
               fontSize: "30px",
               fontWeight: 800,
+              marginTop: "25px",
             }}
           >
             {product.price?.toLocaleString("ar-SA")} ريال
           </div>
 
-          <div
-            style={{
-              marginTop: "30px",
-              padding: "20px",
-              background: "#f3f4f6",
-              borderRadius: "12px",
-            }}
-          >
-            <h2>المواصفات</h2>
+          <h2 style={{ marginTop: "35px" }}>
+            المواصفات
+          </h2>
 
+          <div>
             {Object.entries(product).map(([key, value]) => {
               if (
-                ["id", "name", "category", "brand", "model", "price"].includes(
-                  key
-                )
+                [
+                  "id",
+                  "name",
+                  "category",
+                  "brand",
+                  "model",
+                  "price",
+                ].includes(key)
               ) {
                 return null;
               }
@@ -123,11 +154,12 @@ export default async function ProductPage({ params }) {
                 <div
                   key={key}
                   style={{
-                    padding: "10px 0",
-                    borderBottom: "1px solid #ddd",
+                    padding: "14px 0",
+                    borderBottom: "1px solid #e5e7eb",
                   }}
                 >
                   <strong>{key}: </strong>
+
                   {typeof value === "object"
                     ? JSON.stringify(value)
                     : String(value)}
@@ -141,8 +173,8 @@ export default async function ProductPage({ params }) {
             style={{
               display: "block",
               textAlign: "center",
-              marginTop: "25px",
-              padding: "15px",
+              marginTop: "30px",
+              padding: "16px",
               background: "#111827",
               color: "#fff",
               borderRadius: "10px",
@@ -152,7 +184,7 @@ export default async function ProductPage({ params }) {
           >
             + أضف إلى التجميعة
           </Link>
-        </div>
+        </section>
       </div>
     </main>
   );
