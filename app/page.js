@@ -1,42 +1,32 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
+import { products } from "@/lib/products";
+import { offers } from "@/lib/offers";
 
-export default function Home() {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+export default async function ProductPage({ params }) {
+  const { id } = await params;
 
-  async function searchProducts(e) {
-    e.preventDefault();
+  const product = products.find(
+    (item) => String(item.id) === String(id)
+  );
 
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const response = await fetch(
-        `/api/search?q=${encodeURIComponent(query)}`
-      );
-
-      const data = await response.json();
-
-      if (data.success) {
-        setResults(data.results || []);
-      } else {
-        setResults([]);
-      }
-    } catch (error) {
-      console.error(error);
-      setResults([]);
-    }
-
-    setLoading(false);
+  if (!product) {
+    return (
+      <main dir="rtl" style={{ padding: "60px", textAlign: "center" }}>
+        <h1>المنتج غير موجود</h1>
+        <Link href="/">العودة للرئيسية</Link>
+      </main>
+    );
   }
+
+  const productOffers = offers
+    .filter(
+      (offer) =>
+        String(offer.productId) === String(product.id) &&
+        offer.available
+    )
+    .sort((a, b) => a.price - b.price);
+
+  const cheapest = productOffers[0];
 
   return (
     <main
@@ -44,211 +34,193 @@ export default function Home() {
       style={{
         minHeight: "100vh",
         background: "#f5f6f8",
+        padding: "40px 20px",
         color: "#111827",
       }}
     >
-      <header
-        style={{
-          padding: "22px 30px",
-          background: "#fff",
-          borderBottom: "1px solid #e5e7eb",
-        }}
-      >
-        <div
+      <div style={{ maxWidth: "1100px", margin: "auto" }}>
+        <Link
+          href="/"
           style={{
-            maxWidth: "1200px",
-            margin: "auto",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <strong style={{ fontSize: "22px" }}>
-            PCScout
-          </strong>
-
-          <Link
-            href="/builder"
-            style={{
-              textDecoration: "none",
-              color: "#fff",
-              background: "#111827",
-              padding: "10px 18px",
-              borderRadius: "9px",
-            }}
-          >
-            PC Builder
-          </Link>
-        </div>
-      </header>
-
-      <section
-        style={{
-          maxWidth: "900px",
-          margin: "auto",
-          padding: "80px 20px 40px",
-          textAlign: "center",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "48px",
-            marginBottom: "12px",
-          }}
-        >
-          ابحث عن قطع الكمبيوتر
-        </h1>
-
-        <p
-          style={{
+            textDecoration: "none",
             color: "#6b7280",
-            fontSize: "18px",
           }}
         >
-          قارن المنتجات والأسعار وابنِ جهازك
-        </p>
+          ← العودة للرئيسية
+        </Link>
 
-        <form
-          onSubmit={searchProducts}
+        <section
           style={{
-            display: "flex",
-            gap: "10px",
-            marginTop: "35px",
+            background: "#fff",
+            borderRadius: "20px",
+            padding: "30px",
+            marginTop: "25px",
           }}
         >
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="مثال: Ryzen 7 7800X3D"
-            style={{
-              flex: 1,
-              padding: "17px",
-              border: "1px solid #d1d5db",
-              borderRadius: "12px",
-              fontSize: "16px",
-              outline: "none",
-            }}
-          />
-
-          <button
-            type="submit"
-            style={{
-              border: "none",
-              background: "#111827",
-              color: "#fff",
-              padding: "0 28px",
-              borderRadius: "12px",
-              fontSize: "16px",
-              cursor: "pointer",
-            }}
-          >
-            بحث
-          </button>
-        </form>
-      </section>
-
-      <section
-        style={{
-          maxWidth: "1000px",
-          margin: "auto",
-          padding: "0 20px 60px",
-        }}
-      >
-        {loading && (
-          <div style={{ textAlign: "center" }}>
-            جاري البحث...
+          <div style={{ color: "#6b7280" }}>
+            {product.category}
           </div>
-        )}
 
-        {!loading && results.length > 0 && (
+          <h1 style={{ fontSize: "36px", margin: "8px 0" }}>
+            {product.name}
+          </h1>
+
+          <p style={{ color: "#6b7280" }}>
+            {product.brand} · {product.model}
+          </p>
+
+          <h2 style={{ marginTop: "35px" }}>
+            المواصفات
+          </h2>
+
           <div
             style={{
               display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(200px, 1fr))",
               gap: "12px",
             }}
           >
-            {results.map((product) => (
-              <Link
-                key={product.id}
-                href={`/product/${product.id}`}
-                style={{
-                  textDecoration: "none",
-                  color: "inherit",
-                }}
-              >
+            {Object.entries(product)
+              .filter(
+                ([key]) =>
+                  ![
+                    "id",
+                    "name",
+                    "category",
+                    "brand",
+                    "model",
+                    "price",
+                  ].includes(key)
+              )
+              .map(([key, value]) => (
                 <div
+                  key={key}
                   style={{
-                    background: "#fff",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "15px",
-                    padding: "20px",
+                    background: "#f3f4f6",
+                    padding: "15px",
+                    borderRadius: "10px",
+                  }}
+                >
+                  <small style={{ color: "#6b7280" }}>
+                    {key}
+                  </small>
+
+                  <strong
+                    style={{
+                      display: "block",
+                      marginTop: "5px",
+                    }}
+                  >
+                    {String(value)}
+                  </strong>
+                </div>
+              ))}
+          </div>
+        </section>
+
+        <section
+          style={{
+            background: "#fff",
+            borderRadius: "20px",
+            padding: "30px",
+            marginTop: "20px",
+          }}
+        >
+          <h2>مقارنة الأسعار</h2>
+
+          {productOffers.length === 0 ? (
+            <p style={{ color: "#6b7280" }}>
+              لا توجد عروض متاحة حاليًا.
+            </p>
+          ) : (
+            <div style={{ marginTop: "20px" }}>
+              {productOffers.map((offer) => (
+                <div
+                  key={offer.id}
+                  style={{
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
+                    padding: "18px",
+                    borderBottom: "1px solid #e5e7eb",
                   }}
                 >
                   <div>
-                    <strong
-                      style={{
-                        display: "block",
-                        fontSize: "18px",
-                      }}
-                    >
-                      {product.name}
-                    </strong>
+                    <strong>{offer.store}</strong>
 
-                    <span
-                      style={{
-                        color: "#6b7280",
-                        fontSize: "14px",
-                      }}
-                    >
-                      {product.brand} · {product.category}
-                    </span>
+                    {offer.id === cheapest.id && (
+                      <span
+                        style={{
+                          marginRight: "10px",
+                          background: "#dcfce7",
+                          color: "#15803d",
+                          padding: "5px 8px",
+                          borderRadius: "6px",
+                          fontSize: "12px",
+                        }}
+                      >
+                        أفضل سعر
+                      </span>
+                    )}
                   </div>
 
-                  <div style={{ textAlign: "left" }}>
-                    <strong style={{ fontSize: "20px" }}>
-                      {product.cheapest?.price
-                        ? `${product.cheapest.price.toLocaleString(
-                            "ar-SA"
-                          )} ريال`
-                        : product.price
-                        ? `${product.price.toLocaleString(
-                            "ar-SA"
-                          )} ريال`
-                        : "عرض الأسعار"}
-                    </strong>
-
-                    <div
-                      style={{
-                        color: "#6b7280",
-                        fontSize: "12px",
-                      }}
-                    >
-                      عرض التفاصيل ←
-                    </div>
-                  </div>
+                  <strong style={{ fontSize: "18px" }}>
+                    {offer.price.toLocaleString("ar-SA")} ريال
+                  </strong>
                 </div>
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {!loading &&
-          query &&
-          results.length === 0 && (
-            <div
-              style={{
-                textAlign: "center",
-                color: "#6b7280",
-                padding: "30px",
-              }}
-            >
-              لا توجد نتائج
+              ))}
             </div>
           )}
-      </section>
+
+          {cheapest && (
+            <div
+              style={{
+                marginTop: "20px",
+                padding: "20px",
+                background: "#ecfdf5",
+                borderRadius: "12px",
+              }}
+            >
+              <div style={{ color: "#047857" }}>
+                أفضل سعر حاليًا
+              </div>
+
+              <strong
+                style={{
+                  display: "block",
+                  fontSize: "30px",
+                  marginTop: "5px",
+                }}
+              >
+                {cheapest.price.toLocaleString("ar-SA")} ريال
+              </strong>
+
+              <div style={{ marginTop: "5px" }}>
+                لدى {cheapest.store}
+              </div>
+            </div>
+          )}
+        </section>
+
+        <div style={{ marginTop: "20px" }}>
+          <Link
+            href={`/builder?product=${product.id}`}
+            style={{
+              display: "block",
+              textAlign: "center",
+              background: "#111827",
+              color: "#fff",
+              padding: "16px",
+              borderRadius: "12px",
+              textDecoration: "none",
+              fontWeight: 700,
+            }}
+          >
+            + أضف إلى التجميعة
+          </Link>
+        </div>
+      </div>
     </main>
   );
 }
